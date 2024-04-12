@@ -1,0 +1,63 @@
+﻿p_1:
+SELECT
+    *,
+    (SELECT customer_id FROM orders o WHERE o.id = od.order_id) AS customer_id
+FROM
+    order_details od;
+
+
+p_2:
+SELECT
+    *    
+FROM
+    order_details
+WHERE
+    order_id IN (SELECT id FROM orders o WHERE o.shipper_id = 3);
+
+
+p_3:
+SELECT
+    order_id, AVG(quantity) AS avg_quantity    
+FROM
+    (SELECT * FROM order_details WHERE quantity > 10) AS cutdown_table
+GROUP BY
+    order_id;
+
+
+p_4:
+WITH temp AS (
+    SELECT *
+        FROM order_details
+        WHERE quantity > 10
+)
+SELECT
+    order_id, AVG(quantity) AS avg_quantity    
+FROM
+    temp
+GROUP BY
+    order_id;
+
+
+p_5:
+DROP FUNCTION IF EXISTS Division_function;
+
+
+DELIMITER //
+
+
+CREATE FUNCTION Division_function(number1 FLOAT, number2 FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+NO SQL
+BEGIN
+        DECLARE result FLOAT;
+        SET result = number1 / number2;
+        RETURN result;
+END //
+
+
+DELIMITER ;
+
+
+SELECT *, Division_function(quantity, 2.0) AS divided_quantity
+FROM order_details;
